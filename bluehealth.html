@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueHealth - Consells de Salut</title>
+    
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    
+    <!-- CSS Styling -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1em;
+            color: #7f8c8d;
+        }
+
+        .input-group {
+            position: relative;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .input-group input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #34495e;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #2980b9;
+        }
+
+        .info-icon {
+            display: inline-block;
+            margin-left: 5px;
+            font-size: 0.9em;
+            color: #3498db;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .info-icon:hover .tooltip {
+            display: block;
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            top: -5px;
+            left: 110%;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            width: 200px;
+            z-index: 10;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 15px 20px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .response {
+            margin-top: 20px;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            color: #2c3e50;
+            display: none;
+        }
+
+        footer {
+            margin-top: 20px;
+            font-size: 0.8em;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>BlueHealth</h1>
+        <p>Introdueix la teva informació per rebre consells de salut personalitzats.</p>
+
+        <div class="input-group">
+            <label for="heartRate">Quina és la teva freqüència cardíaca actual?
+                <span class="info-icon">ℹ
+                    <span class="tooltip">
+                        Per mesurar la teva freqüència cardíaca, compta el nombre de batecs que sents en 60 segons posant dos dits sobre el teu canell o coll.
+                    </span>
+                </span>
+            </label>
+            <input type="number" id="heartRate" placeholder="Frequència cardíaca (bpm)">
+        </div>
+
+        <div class="input-group">
+            <label for="glucoseLevel">Nivell de glucosa
+                <span class="info-icon">ℹ
+                    <span class="tooltip">
+                        El nivell de glucosa es mesura amb un glucòmetre. Punxa el dit, aplica una gota de sang al sensor, i llegeix els nivells a l’aparell.
+                    </span>
+                </span>
+            </label>
+            <input type="number" id="glucoseLevel" placeholder="Nivell de glucosa (mg/dL)">
+        </div>
+
+        <div class="input-group">
+            <label for="stepsToday">Quants passos has fet avui?</label>
+            <input type="number" id="stepsToday" placeholder="Passos avui">
+        </div>
+
+        <button onclick="getAdvice()">Enviar</button>
+
+        <div id="responseBox" class="response"></div>
+
+        <footer>
+            BlueHealth &copy; 2024. Millora la teva salut cada dia!
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Lista de respuestas estáticas mejoradas en caso de error con la API
+        const staticResponses = [
+            "Sembla que la teva freqüència cardíaca és bastant baixa (<70 bpm) i també tens nivells baixos de glucosa (<50 mg/dL). A més, has fet molta activitat física (>10,000 passos). Et recomanem menjar alguna cosa per augmentar els teus nivells d'energia i controlar la teva freqüència cardíaca.",
+            "Els teus nivells de freqüència cardíaca (60-100 bpm) i glucosa (70-140 mg/dL) semblen normals. Continua així mantenint una dieta equilibrada i exercici moderat per seguir amb bona salut!",
+            "Has fet menys de 3000 passos avui, cosa que indica baixa activitat física. Intenta moure't més, com fer una caminada de 30 minuts o fer exercici lleuger per mantenir el teu cos actiu.",
+            "Els teus nivells de glucosa estan fora del rang normal (menys de 70 o més de 140 mg/dL). És important que revisis els teus hàbits alimentaris i consultis amb un especialista per ajustar els teus nivells de glucosa.",
+            "Estàs fent un treball excel·lent mantenint una activitat física alta amb més de 10,000 passos, i els teus nivells de freqüència cardíaca (60-100 bpm) i glucosa (70-140 mg/dL) són ideals. Continua amb el bon treball!"
+        ];
+    
+        function getAdvice() {
+            const heartRate = document.getElementById('heartRate').value;
+            const glucoseLevel = document.getElementById('glucoseLevel').value;
+            const stepsToday = document.getElementById('stepsToday').value;
+    
+            const responseBox = document.getElementById('responseBox');
+    
+            // Verificar que todos los campos están llenos
+            if (heartRate && glucoseLevel && stepsToday) {
+                try {
+                    // Aquí se haría la llamada a la API
+                    throw new Error("Simulating API failure");  // Simulando error de API
+    
+                    // Si la API funciona correctamente, mostraría el resultado de la API
+                    const advice = `
+                        La teva freqüència cardíaca actual és ${heartRate} bpm.
+                        El teu nivell de glucosa és ${glucoseLevel} mg/dL.
+                        Has fet ${stepsToday} passos avui.
+    
+                        Et recomanem que segueixis fent activitat física moderada, 
+                        mantingues una dieta equilibrada i revisis regularment els teus nivells de glucosa.
+                    `;
+                    responseBox.textContent = advice;
+                    responseBox.style.display = 'block';
+    
+                } catch (error) {
+                    // Condiciones para seleccionar respuestas estáticas basadas en los datos introducidos
+    
+                    // Caso 1: Frecuencia cardíaca baja, glucosa baja y muchos pasos
+                    if (heartRate < 70 && glucoseLevel < 50 && stepsToday > 10000) {
+                        responseBox.textContent = staticResponses[0];  // "Sembla que la teva freqüència cardíaca és bastant baixa..."
+                    }
+                    // Caso 2: Frecuencia y glucosa normales
+                    else if (heartRate >= 60 && heartRate <= 100 && glucoseLevel >= 70 && glucoseLevel <= 140) {
+                        responseBox.textContent = staticResponses[1];  // "Els teus nivells semblen normals..."
+                    }
+                    // Caso 3: Baja actividad física
+                    else if (stepsToday < 3000) {
+                        responseBox.textContent = staticResponses[2];  // "Has fet menys de 3000 passos..."
+                    }
+                    // Caso 4: Niveles de glucosa fuera de rango
+                    else if (glucoseLevel < 70 || glucoseLevel > 140) {
+                        responseBox.textContent = staticResponses[3];  // "Els teus nivells de glucosa estan fora del rang normal..."
+                    }
+                    // Caso 5: Alta actividad física y niveles normales
+                    else if (stepsToday >= 10000 && heartRate >= 60 && heartRate <= 100 && glucoseLevel >= 70 && glucoseLevel <= 140) {
+                        responseBox.textContent = staticResponses[4];  // "Estàs fent un treball excel·lent..."
+                    } 
+                    // Si ninguna condición anterior se cumple, mostrar un mensaje genérico
+                    else {
+                        responseBox.textContent = "Segueix cuidant la teva salut i revisa els teus nivells regularment.";
+                    }
+    
+                    // Mostrar el mensaje seleccionado
+                    responseBox.style.display = 'block';
+                }
+            } else {
+                responseBox.textContent = "Si us plau, omple tots els camps.";
+                responseBox.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
